@@ -1,0 +1,142 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidChat(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             (!('lastMessage' in data) || (data.lastMessage is string && data.lastMessage.size() <= 1000)) &&
+             (!('messageCount' in data) || (data.messageCount is int && data.messageCount >= 0)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidKnowledge(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 100 &&
+             data.content is string && data.content.size() <= 50000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidProject(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.type is string && data.type.size() >= 1 && data.type.size() <= 50 &&
+             data.description is string && data.description.size() <= 1000 &&
+             (!('status' in data) || (data.status is string && data.status.size() <= 50)) &&
+             (!('codeSnippet' in data) || (data.codeSnippet is string && data.codeSnippet.size() <= 50000)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidMemory(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.key is string && data.key.size() >= 1 && data.key.size() <= 100 &&
+             data.value is string && data.value.size() >= 1 && data.value.size() <= 2000 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 50 &&
+             data.isApproved is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // User chats
+    match /users/{userId}/chats/{chatId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(chatId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'title', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'title', 'lastMessage', 'messageCount', 'createdAt', 'updatedAt']) &&
+                       isValidChat(incoming());
+      allow update: if isOwner(userId) &&
+                       isValidId(chatId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidChat(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'lastMessage', 'messageCount', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(chatId);
+    }
+
+    // Knowledge items
+    match /users/{userId}/knowledge/{docId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(docId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'title', 'category', 'content', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'title', 'category', 'content', 'createdAt', 'updatedAt']) &&
+                       isValidKnowledge(incoming());
+      allow update: if isOwner(userId) &&
+                       isValidId(docId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidKnowledge(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'category', 'content', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(docId);
+    }
+
+    // User Projects
+    match /users/{userId}/projects/{projectId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(projectId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'name', 'type', 'description', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'name', 'type', 'description', 'status', 'codeSnippet', 'createdAt', 'updatedAt']) &&
+                       isValidProject(incoming());
+      allow update: if isOwner(userId) &&
+                       isValidId(projectId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidProject(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'type', 'description', 'status', 'codeSnippet', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(projectId);
+    }
+
+    // User Memories
+    match /users/{userId}/memories/{memoryId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(memoryId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'key', 'value', 'category', 'isApproved', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'key', 'value', 'category', 'isApproved', 'createdAt', 'updatedAt']) &&
+                       isValidMemory(incoming());
+      allow update: if isOwner(userId) &&
+                       isValidId(memoryId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidMemory(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['key', 'value', 'category', 'isApproved', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(memoryId);
+    }
+  }
+}

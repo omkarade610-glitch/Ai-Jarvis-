@@ -1,0 +1,170 @@
+{
+  "entities": {
+    "ChatSession": {
+      "title": "ChatSession",
+      "description": "Conversation thread stored for JARVIS AI assistant",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User UID who owns this chat"
+        },
+        "title": {
+          "type": "string",
+          "description": "Chat title or topic"
+        },
+        "lastMessage": {
+          "type": "string",
+          "description": "Preview of the last message"
+        },
+        "messageCount": {
+          "type": "integer",
+          "description": "Total message count in this chat"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when chat was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when chat was last updated"
+        }
+      },
+      "required": ["userId", "title", "createdAt", "updatedAt"]
+    },
+    "KnowledgeItem": {
+      "title": "KnowledgeItem",
+      "description": "Persistent knowledge item in the AI Knowledge Library",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User UID who owns this knowledge document"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the knowledge document"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category such as Science, Technology, AI, Programming, Education"
+        },
+        "content": {
+          "type": "string",
+          "description": "Detailed text content of the knowledge item"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["userId", "title", "category", "content", "createdAt", "updatedAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "User coding studio or app builder project",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User UID who created the project"
+        },
+        "name": {
+          "type": "string",
+          "description": "Project title"
+        },
+        "type": {
+          "type": "string",
+          "description": "Project type e.g. web, android, script"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description or prompt"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current build or development status"
+        },
+        "codeSnippet": {
+          "type": "string",
+          "description": "Main code or manifest content"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["userId", "name", "type", "description", "createdAt", "updatedAt"]
+    },
+    "UserMemory": {
+      "title": "UserMemory",
+      "description": "Approved memory instruction or personal preference",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User UID who approved this memory"
+        },
+        "key": {
+          "type": "string",
+          "description": "Memory key or topic"
+        },
+        "value": {
+          "type": "string",
+          "description": "Memory statement or instruction"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category such as preference, project, identity"
+        },
+        "isApproved": {
+          "type": "boolean",
+          "description": "Whether approved by the user"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when memory was stored"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when memory was updated"
+        }
+      },
+      "required": ["userId", "key", "value", "category", "isApproved", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/chats/{chatId}": {
+      "schema": { "$ref": "#/entities/ChatSession" },
+      "description": "User chat conversations with JARVIS"
+    },
+    "/users/{userId}/knowledge/{docId}": {
+      "schema": { "$ref": "#/entities/KnowledgeItem" },
+      "description": "User knowledge base documents"
+    },
+    "/users/{userId}/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "User coding and app builder projects"
+    },
+    "/users/{userId}/memories/{memoryId}": {
+      "schema": { "$ref": "#/entities/UserMemory" },
+      "description": "Approved user preferences and assistant memories"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "JARVIS AI",
+  "description": "Futuristic multilingual personal AI assistant powered by Gemini with search, coding studio, knowledge base, voice, and device tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
