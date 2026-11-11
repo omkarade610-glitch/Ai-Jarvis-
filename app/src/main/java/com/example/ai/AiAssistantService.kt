@@ -161,4 +161,59 @@ class AiAssistantService {
     """.trimIndent()
     return generateResponse(prompt)
   }
+
+  suspend fun generateAnimeConcept(
+    style: String,
+    characterPrompt: String
+  ): String {
+    val prompt = """
+      You are the JARVIS Anime & CGI Creation Studio.
+      Art Style: $style (e.g. Modern Shonen, Studio Ghibli, Cyberpunk, 3D CGI Movie, Manga Sketch)
+      Concept Description: $characterPrompt
+      Produce a complete production package:
+      1. Character Profile & Visual Reference Sheet (Face, Attire, Colors, Silhouette, Signature Pose)
+      2. Scene Storyboard Breakdown (Shot Type, Camera Angle, Lighting, Background Elements)
+      3. Dialogue & Voice Direction (Tone, Emotion, Japanese/English/Hindi dub cues)
+      4. Detailed Image Prompt (Optimized for generative image models with high fidelity tags)
+    """.trimIndent()
+    return generateResponse(prompt)
+  }
+
+  suspend fun generateVideoStory(
+    topic: String,
+    style: String
+  ): String {
+    val prompt = """
+      You are the JARVIS AI Video Creation & CGI Movie Director.
+      Topic: $topic
+      Format/Style: $style (e.g. Cinematic Movie, YouTube Short, Anime Episode, Tech Explainer)
+      Create a scene-by-scene production script:
+      - Scene 1..N: Visual Scene Description, Camera Motion (Pan, Dolly, Zoom), VFX/CGI instructions.
+      - Voiceover / Narrator Script with timestamps.
+      - Background Music & Sound Effects (SFX).
+      - Transitions and Final MP4 Rendering Parameters.
+    """.trimIndent()
+    return generateResponse(prompt)
+  }
+
+  suspend fun analyzeDocument(
+    docTitle: String,
+    content: String,
+    question: String
+  ): String {
+    val prompt = """
+      You are the JARVIS Document & File Intelligence Assistant.
+      Document Name: $docTitle
+      Document Content:
+      \"\"\"
+      $content
+      \"\"\"
+      User Question / Directive: $question
+      Provide a rigorous, structured response:
+      1. Executive Summary & Key Takeaways
+      2. Direct Answer to the User's Query with cited facts from the text
+      3. Actionable Insights or Data Extraction (tabular if applicable)
+    """.trimIndent()
+    return generateResponse(prompt)
+  }
 }

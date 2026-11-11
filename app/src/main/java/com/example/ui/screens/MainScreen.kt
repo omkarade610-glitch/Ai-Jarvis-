@@ -44,7 +44,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.tabs.ApkBuilderTab
 import com.example.ui.tabs.AssistantTab
+import com.example.ui.tabs.DocumentAssistantTab
 import com.example.ui.tabs.KnowledgeTab
+import com.example.ui.tabs.MediaStudioTab
 import com.example.ui.tabs.OwnerTab
 import com.example.ui.tabs.SearchTab
 import com.example.ui.tabs.StudioTab
@@ -57,6 +59,11 @@ import com.example.ui.theme.JarvisSurfaceCard
 import com.example.ui.theme.JarvisSurfaceDark
 import com.example.ui.viewmodel.JarvisTab
 import com.example.ui.viewmodel.JarvisViewModel
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.MovieCreation
 
 @Composable
 fun MainScreen(
@@ -119,6 +126,18 @@ fun MainScreen(
       }
     },
     bottomBar = {
+      val tabs = listOf(
+        JarvisTab.ASSISTANT to Icons.Default.SmartToy,
+        JarvisTab.SEARCH to Icons.Default.Search,
+        JarvisTab.KNOWLEDGE to Icons.AutoMirrored.Filled.MenuBook,
+        JarvisTab.STUDIO to Icons.Default.Terminal,
+        JarvisTab.MEDIA_STUDIO to Icons.Default.MovieCreation,
+        JarvisTab.DOCUMENTS to Icons.Default.Description,
+        JarvisTab.APK_BUILDER to Icons.Default.Android,
+        JarvisTab.TOOLS to Icons.Default.Build,
+        JarvisTab.OWNER to Icons.Default.Shield
+      )
+
       NavigationBar(
         containerColor = JarvisSurfaceDark,
         contentColor = JarvisCyan,
@@ -126,17 +145,8 @@ fun MainScreen(
         modifier = Modifier
           .windowInsetsPadding(WindowInsets.navigationBars)
           .border(1.dp, JarvisCardBorder)
+          .horizontalScroll(rememberScrollState())
       ) {
-        val tabs = listOf(
-          JarvisTab.ASSISTANT to Icons.Default.SmartToy,
-          JarvisTab.SEARCH to Icons.Default.Search,
-          JarvisTab.KNOWLEDGE to Icons.AutoMirrored.Filled.MenuBook,
-          JarvisTab.STUDIO to Icons.Default.Terminal,
-          JarvisTab.APK_BUILDER to Icons.Default.Android,
-          JarvisTab.TOOLS to Icons.Default.Build,
-          JarvisTab.OWNER to Icons.Default.Shield
-        )
-
         tabs.forEach { (tab, icon) ->
           val isSelected = currentTab == tab
           NavigationBarItem(
@@ -180,6 +190,8 @@ fun MainScreen(
         JarvisTab.SEARCH -> SearchTab(viewModel = viewModel)
         JarvisTab.KNOWLEDGE -> KnowledgeTab(viewModel = viewModel)
         JarvisTab.STUDIO -> StudioTab(viewModel = viewModel)
+        JarvisTab.MEDIA_STUDIO -> MediaStudioTab(viewModel = viewModel)
+        JarvisTab.DOCUMENTS -> DocumentAssistantTab(viewModel = viewModel)
         JarvisTab.APK_BUILDER -> ApkBuilderTab(viewModel = viewModel)
         JarvisTab.TOOLS -> ToolsTab(viewModel = viewModel)
         JarvisTab.OWNER -> OwnerTab(viewModel = viewModel, onSignOut = onSignOut)

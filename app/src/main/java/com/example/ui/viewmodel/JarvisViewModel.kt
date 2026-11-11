@@ -29,6 +29,8 @@ enum class JarvisTab(val title: String, val iconName: String) {
   SEARCH("Live Search", "Search"),
   KNOWLEDGE("Knowledge", "MenuBook"),
   STUDIO("Code Studio", "Terminal"),
+  MEDIA_STUDIO("Media Studio", "MovieCreation"),
+  DOCUMENTS("Doc Assistant", "Description"),
   APK_BUILDER("APK Builder", "Android"),
   TOOLS("Device Tools", "Build"),
   OWNER("Owner Panel", "Shield")
@@ -134,6 +136,39 @@ fun HolographicCore(modifier: Modifier = Modifier) {
   val userMemories: StateFlow<List<UserMemory>> = repository.observeMemories()
     .catch { emit(emptyList()) }
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  // Media & Anime Studio State
+  private val _animeStyle = MutableStateFlow("Cyberpunk Anime")
+  val animeStyle: StateFlow<String> = _animeStyle.asStateFlow()
+
+  private val _mediaOutput = MutableStateFlow("")
+  val mediaOutput: StateFlow<String> = _mediaOutput.asStateFlow()
+
+  private val _isMediaProcessing = MutableStateFlow(false)
+  val isMediaProcessing: StateFlow<Boolean> = _isMediaProcessing.asStateFlow()
+
+  // Document Assistant State
+  private val _docTitle = MutableStateFlow("System_Specification.txt")
+  val docTitle: StateFlow<String> = _docTitle.asStateFlow()
+
+  private val _docContent = MutableStateFlow(
+    """JARVIS System Architecture Spec: Version 1.0.0.
+Neural Core: Google Gemini 3.8 Flash.
+Data Engine: Zero-Trust Firebase Firestore with Google Sign-In.
+Security: Firebase App Check with reCAPTCHA Enterprise & Debug attestation.
+Mobile OS: Android 14/15/16 with Jetpack Compose edge-to-edge UI.
+Build Pipeline: Cloud Gradle build system for Debug APK, Release APK, and AAB."""
+  )
+  val docContent: StateFlow<String> = _docContent.asStateFlow()
+
+  private val _docQuestion = MutableStateFlow("Summarize the neural core and security specs.")
+  val docQuestion: StateFlow<String> = _docQuestion.asStateFlow()
+
+  private val _docAnalysis = MutableStateFlow("")
+  val docAnalysis: StateFlow<String> = _docAnalysis.asStateFlow()
+
+  private val _isDocAnalyzing = MutableStateFlow(false)
+  val isDocAnalyzing: StateFlow<Boolean> = _isDocAnalyzing.asStateFlow()
 
   fun setTab(tab: JarvisTab) {
     _currentTab.value = tab
@@ -351,6 +386,67 @@ fun HolographicCore(modifier: Modifier = Modifier) {
         repository.deleteMemory(id)
       } catch (e: Exception) {
         // error logged
+      }
+    }
+  }
+
+  fun setAnimeStyle(style: String) {
+    _animeStyle.value = style
+  }
+
+  fun generateAnimeConcept(prompt: String) {
+    if (prompt.isBlank() || !_masterOn.value) return
+    _isMediaProcessing.value = true
+    viewModelScope.launch {
+      try {
+        _mediaOutput.value = aiService.generateAnimeConcept(_animeStyle.value, prompt)
+      } catch (e: Exception) {
+        _mediaOutput.value = "Anime generation error: ${e.localizedMessage}"
+      } finally {
+        _isMediaProcessing.value = false
+      }
+    }
+  }
+
+  fun generateVideoScript(topic: String, format: String) {
+    if (topic.isBlank() || !_masterOn.value) return
+    _isMediaProcessing.value = true
+    viewModelScope.launch {
+      try {
+        _mediaOutput.value = aiService.generateVideoStory(topic, format)
+      } catch (e: Exception) {
+        _mediaOutput.value = "Video script generation error: ${e.localizedMessage}"
+      } finally {
+        _isMediaProcessing.value = false
+      }
+    }
+  }
+
+  fun updateDocTitle(title: String) {
+    _docTitle.value = title
+  }
+
+  fun updateDocContent(content: String) {
+    _docContent.value = content
+  }
+
+  fun updateDocQuestion(question: String) {
+    _docQuestion.value = question
+  }
+
+  fun analyzeDocument() {
+    val title = _docTitle.value
+    val content = _docContent.value
+    val question = _docQuestion.value
+    if (content.isBlank() || !_masterOn.value) return
+    _isDocAnalyzing.value = true
+    viewModelScope.launch {
+      try {
+        _docAnalysis.value = aiService.analyzeDocument(title, content, question)
+      } catch (e: Exception) {
+        _docAnalysis.value = "Document analysis failed: ${e.localizedMessage}"
+      } finally {
+        _isDocAnalyzing.value = false
       }
     }
   }
